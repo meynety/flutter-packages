@@ -260,6 +260,18 @@ class GoRouteConfig extends RouteBaseConfig {
     return buffer.toString();
   }
 
+  String get _paramKeys {
+    final StringBuffer buffer = StringBuffer();
+    for (final ParameterElement param in <ParameterElement>[
+      ..._ctorParams,
+      ..._ctorQueryParams,
+    ]) {
+      buffer.writeln(
+          'static String ${param.name}Key = ${keyParameter(param, _pathParams)};');
+    }
+    return buffer.toString();
+  }
+
   String _decodeFor(ParameterElement element) {
     if (element.isRequired) {
       if (element.type.nullabilitySuffix == NullabilitySuffix.question &&
@@ -366,6 +378,8 @@ class GoRouteConfig extends RouteBaseConfig {
   String get _extensionDefinition => '''
 extension $_extensionName on $_className {
   static $_className _fromState(GoRouterState state) $_fromStateConstructor
+  
+  $_paramKeys
 
   String get location => GoRouteData.\$location($_locationArgs,$_locationQueryParams);
 

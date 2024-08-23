@@ -70,6 +70,10 @@ String decodeParameter(ParameterElement element, Set<String> pathParameters) {
   );
 }
 
+String keyParameter(ParameterElement element, Set<String> pathParameters) {
+  return _paramKey(element, pathParameters);
+}
+
 /// Returns the encoded [String] value for [element], if its type is supported.
 ///
 /// Otherwise, throws an [InvalidGenerationSourceError].
@@ -97,9 +101,9 @@ String _stateValueAccess(ParameterElement element, Set<String> pathParameters) {
 
   late String access;
   if (pathParameters.contains(element.name)) {
-    access = 'pathParameters[${escapeDartString(element.name)}]';
+    access = 'pathParameters[${_paramKey(element, pathParameters)}]';
   } else {
-    access = 'uri.queryParameters[${escapeDartString(element.name.kebab)}]';
+    access = 'uri.queryParameters[${_paramKey(element, pathParameters)}]';
   }
   if (pathParameters.contains(element.name) ||
       (!element.type.isNullableType && !element.hasDefaultValue)) {
@@ -107,6 +111,21 @@ String _stateValueAccess(ParameterElement element, Set<String> pathParameters) {
   }
 
   return access;
+}
+
+// TODO doc + review every usage of key and use this method instead (only used in [_stateValueAccess] so far)
+String _paramKey(ParameterElement element, Set<String> pathParameters) {
+  if (element.isExtraField) {
+    throw ArgumentError.value(
+        element, 'element', 'Is an extra field, wich is not supported');
+  }
+
+  late String access;
+  if (pathParameters.contains(element.name)) {
+    return escapeDartString(element.name);
+  } else {
+    return escapeDartString(element.name.kebab);
+  }
 }
 
 abstract class _TypeHelper {
